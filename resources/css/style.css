@@ -1,9 +1,35 @@
+/* Fonts */
+
+@font-face {
+    font-family: Lato-Black;
+    src: url("../fonts/Lato/Lato-Black.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: Lato-Thin;
+    src: url("../fonts/Lato/Lato-Thin.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: Lato-Bold;
+    src: url("../fonts/Lato/Lato-Bold.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: Lato-Semibold;
+    src: url("../fonts/Lato/Lato-Semibold.ttf") format("truetype");
+}
+
 /* Universal styling */
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+}
+
+html {
+    font-size: 16px;
 }
 
 body {
@@ -25,6 +51,16 @@ body {
 header {
     height: 100%;
     background-color: #603f97;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+header h1 {
+    color: white;
+    font-family: Lato-Black;
+    font-size: 3rem;
+    letter-spacing: 1.75px;
 }
 
 /* Footer styling */
@@ -39,5 +75,10 @@ footer {
 
 footer h6 {
     color: white;
-    font-size: 18px;
+    font-family: Lato-Thin;
+    font-size: 0.95rem;
+}
+
+.footer-name {
+    font-family: Lato-Semibold;
 }
