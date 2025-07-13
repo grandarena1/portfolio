@@ -42,7 +42,7 @@ body {
 .container {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 2fr 4fr 1fr 60px;
+    grid-template-rows: 2fr 60px 4fr 60px;
     height: 100%;
 }
 
@@ -98,7 +98,22 @@ header h1 {
 
 /* Links section styling */
 .links-section {
-    background-color: #111317;
+    background-color: #34065f;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+nav ul {
+    display: inline-flex;
+    list-style: none;
+}
+
+nav ul li {
+    padding: 5px 40px;
+    margin: 0 15px;
+    font-family: Lato-Black;
+    color: white;
 }
 
 /* Footer styling */
