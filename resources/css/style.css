@@ -51,9 +51,35 @@ body {
 header {
     height: 100%;
     background-color: #603f97;
-    display: flex;
+    display: grid;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.header-left {
+    display: flex;
+    grid-area: 1 / 1;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.profile-photo {
+    height: 200px;
+    border-radius: 100%;
+}
+
+.header-right {
+    grid-area: 1 / 2;
+}
+
+.header-name {
+    color: #3fbeb6;
+    font-family: Lato-Bold;
+    font-weight: 600;
+    letter-spacing: 1.75px;
 }
 
 header h1 {
