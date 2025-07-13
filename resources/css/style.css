@@ -121,10 +121,27 @@ nav ul li a {
     padding: 17px 50px;
     margin: 0 25px;
     background-color: #3FBEB6;
+    text-decoration: none;
+    color: white;
 }
 
 nav ul li a:hover {
     background-color: #7a3fbe;
+}
+
+/* Main section styling */
+
+main div {
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+}
+
+h2 {
+    font-size: 28px;
+    font-family: Lato-Bold;
+    color: rgb(80, 80, 80);
+    letter-spacing: 1.5px;
 }
 
 /* Footer styling */
