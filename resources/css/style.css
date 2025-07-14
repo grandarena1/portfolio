@@ -20,6 +20,11 @@
     src: url("../fonts/Lato/Lato-Semibold.ttf") format("truetype");
 }
 
+@font-face {
+    font-family: Lato-Regular;
+    src: url("../fonts/Lato/Lato-Regular.ttf") format("truetype");
+}
+
 /* Universal styling */
 
 * {
@@ -28,14 +33,10 @@
     padding: 0;
 }
 
-html {
+html, body {
     font-size: 16px;
     max-width: 100%;
-}
-
-body {
-    max-width: 100%;
-    width: 100%;
+    min-height: 100%;
     height: 1200px;
 }
 
@@ -121,21 +122,49 @@ header h1 {
 
 .links li:hover {
     background-color: #3FBEB6;
+    cursor: pointer;
 }
 
 /* Main section styling */
+
+main {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
 
 main div {
     padding: 40px;
     display: flex;
     justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+main p {
+    text-align: center;
+    font-family: Lato-Regular;
+    font-size: 1.5rem;
+    padding-top: 20px;
+    color: grey;
 }
 
 h2 {
-    font-size: 28px;
+    font-size: 1.75rem;
     font-family: Lato-Bold;
     color: rgb(80, 80, 80);
     letter-spacing: 1.5px;
+}
+
+#home h2 {
+    font-family: Lato-Black;
+    letter-spacing: 2px;
+    font-size: 2rem;
+    font-weight: 900;
+    background-color: #361555;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px 20px 10px 10px;
 }
 
 /* Footer styling */
