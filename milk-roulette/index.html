@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Milk Roulette">
+    <title>Milk Roulette</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bg-bubbles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.15;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-30px) scale(1.1); }
+        }
+
+        .app {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            padding: 20px;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            text-align: center;
+            letter-spacing: -1px;
+        }
+
+        h1 span {
+            display: block;
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+
+        .wheel-outer {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            padding: 8px;
+            background: conic-gradient(
+                #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff,
+                #5f27cd, #01a3a4, #f368e0, #ff6348, #2ed573,
+                #1e90ff, #ffa502, #ff6b6b
+            );
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3), 0 0 80px rgba(255,255,255,0.1);
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 10px 40px rgba(0,0,0,0.3), 0 0 60px rgba(255,107,107,0.2); }
+            to { box-shadow: 0 10px 40px rgba(0,0,0,0.3), 0 0 80px rgba(84,160,255,0.3); }
+        }
+
+        .wheel-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #2d1b69, #1a0a3e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wheel-inner::before {
+            content: '';
+            position: absolute;
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            border: 2px dashed rgba(255,255,255,0.15);
+        }
+
+        .result-number {
+            font-size: 5rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 30px rgba(255,255,255,0.5);
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 2;
+        }
+
+        .result-number.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .result-number.pop {
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .question-mark {
+            font-size: 5rem;
+            font-weight: 900;
+            color: rgba(255,255,255,0.4);
+            z-index: 2;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.1); opacity: 0.6; }
+        }
+
+        .question-mark.hidden {
+            display: none;
+        }
+
+        .spinning-numbers {
+            position: absolute;
+            font-size: 5rem;
+            font-weight: 900;
+            color: #fff;
+            z-index: 2;
+            display: none;
+        }
+
+        .spinning-numbers.active {
+            display: block;
+            animation: numberCycle 0.08s steps(1) infinite;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 25px solid #feca57;
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.3));
+            z-index: 3;
+        }
+
+        .spin-btn {
+            width: 220px;
+            height: 70px;
+            border: none;
+            border-radius: 35px;
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+            background-size: 300% 300%;
+            animation: gradientShift 4s ease infinite;
+            color: #1a0a3e;
+            box-shadow: 0 8px 30px rgba(255,107,107,0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .spin-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 15px rgba(255,107,107,0.4);
+        }
+
+        .spin-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .history {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 320px;
+            min-height: 40px;
+        }
+
+        .history-item {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #fff;
+            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        @keyframes slideIn {
+            from { transform: scale(0) rotate(-180deg); opacity: 0; }
+            to { transform: scale(1) rotate(0); opacity: 1; }
+        }
+
+        .confetti-container {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            animation: confettiFall 2s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        .wheel-spinning .wheel-outer {
+            animation: wheelSpin 2s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        @keyframes wheelSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(1440deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-bubbles" id="bgBubbles"></div>
+
+    <div class="app">
+        <h1>
+            Milk Roulette
+            <span>Pick your number</span>
+        </h1>
+
+        <div class="wheel-container" id="wheelContainer">
+            <div class="pointer"></div>
+            <div class="wheel-outer">
+                <div class="wheel-inner">
+                    <div class="question-mark" id="questionMark">?</div>
+                    <div class="spinning-numbers" id="spinningNumbers"></div>
+                    <div class="result-number" id="resultNumber"></div>
+                </div>
+            </div>
+        </div>
+
+        <button class="spin-btn" id="spinBtn" onclick="spin()">SPIN!</button>
+
+        <div class="history" id="history"></div>
+    </div>
+
+    <div class="confetti-container" id="confettiContainer"></div>
+
+    <script>
+        const COLORS = [
+            '#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff',
+            '#5f27cd', '#01a3a4', '#f368e0', '#ff6348', '#2ed573',
+            '#1e90ff', '#ffa502', '#ee5a24', '#7bed9f', '#70a1ff'
+        ];
+
+        let isSpinning = false;
+        const history = [];
+
+        function createBubbles() {
+            const container = document.getElementById('bgBubbles');
+            for (let i = 0; i < 12; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                const size = Math.random() * 120 + 40;
+                bubble.style.width = size + 'px';
+                bubble.style.height = size + 'px';
+                bubble.style.left = Math.random() * 100 + '%';
+                bubble.style.top = Math.random() * 100 + '%';
+                bubble.style.background = COLORS[Math.floor(Math.random() * COLORS.length)];
+                bubble.style.animationDelay = (Math.random() * 4) + 's';
+                bubble.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                container.appendChild(bubble);
+            }
+        }
+
+        function getRandomNumber() {
+            return Math.floor(Math.random() * 34) + 1;
+        }
+
+        function spin() {
+            if (isSpinning) return;
+            isSpinning = true;
+
+            const btn = document.getElementById('spinBtn');
+            const questionMark = document.getElementById('questionMark');
+            const spinningNumbers = document.getElementById('spinningNumbers');
+            const resultNumber = document.getElementById('resultNumber');
+            const wheelContainer = document.getElementById('wheelContainer');
+
+            btn.disabled = true;
+            questionMark.classList.add('hidden');
+            resultNumber.classList.remove('visible', 'pop');
+            resultNumber.textContent = '';
+            spinningNumbers.classList.add('active');
+
+            wheelContainer.classList.add('wheel-spinning');
+
+            let flickerCount = 0;
+            const flickerInterval = setInterval(() => {
+                spinningNumbers.textContent = getRandomNumber();
+                spinningNumbers.style.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+                flickerCount++;
+            }, 80);
+
+            const totalDuration = 2000 + Math.random() * 1000;
+
+            setTimeout(() => {
+                clearInterval(flickerInterval);
+                spinningNumbers.classList.remove('active');
+                wheelContainer.classList.remove('wheel-spinning');
+
+                const finalNumber = getRandomNumber();
+                resultNumber.textContent = finalNumber;
+                resultNumber.style.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+                resultNumber.classList.add('visible', 'pop');
+
+                addToHistory(finalNumber);
+                launchConfetti();
+
+                if (navigator.vibrate) {
+                    navigator.vibrate([50, 30, 100]);
+                }
+
+                btn.disabled = false;
+                isSpinning = false;
+            }, totalDuration);
+        }
+
+        function addToHistory(number) {
+            history.unshift(number);
+            if (history.length > 7) history.pop();
+
+            const container = document.getElementById('history');
+            container.innerHTML = '';
+            history.forEach((num, i) => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.textContent = num;
+                item.style.background = COLORS[num % COLORS.length];
+                item.style.animationDelay = (i * 0.05) + 's';
+                if (i > 0) item.style.opacity = 1 - (i * 0.1);
+                container.appendChild(item);
+            });
+        }
+
+        function launchConfetti() {
+            const container = document.getElementById('confettiContainer');
+            container.innerHTML = '';
+            for (let i = 0; i < 40; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.background = COLORS[Math.floor(Math.random() * COLORS.length)];
+                confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                confetti.style.width = (Math.random() * 8 + 6) + 'px';
+                confetti.style.height = (Math.random() * 8 + 6) + 'px';
+                container.appendChild(confetti);
+            }
+            setTimeout(() => { container.innerHTML = ''; }, 2500);
+        }
+
+        createBubbles();
+    </script>
+</body>
+</html>
