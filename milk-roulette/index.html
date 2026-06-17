@@ -400,7 +400,7 @@
 
         function addToHistory(number) {
             history.unshift(number);
-            if (history.length > 7) history.pop();
+            if (history.length > 3) history.pop();
 
             const container = document.getElementById('history');
             container.innerHTML = '';
