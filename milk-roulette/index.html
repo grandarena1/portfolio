@@ -281,6 +281,99 @@
             100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
 
+        .result-number.camel {
+            font-size: 1.8rem;
+            color: #ff0000 !important;
+            text-shadow: 0 0 30px rgba(255,0,0,0.8), 0 0 60px rgba(139,0,0,0.5);
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        .blood-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .blood-overlay.active {
+            opacity: 1;
+        }
+
+        .blood-drip {
+            position: absolute;
+            top: -10px;
+            background: linear-gradient(180deg, #8b0000, #cc0000 30%, #ff0000 60%, rgba(139,0,0,0.6));
+            border-radius: 0 0 50% 50%;
+            animation: drip ease-in forwards;
+        }
+
+        @keyframes drip {
+            0% { height: 0; opacity: 0.9; }
+            70% { opacity: 0.9; }
+            100% { height: 110vh; opacity: 0.7; }
+        }
+
+        .blood-vignette {
+            position: fixed;
+            inset: 0;
+            z-index: 99;
+            pointer-events: none;
+            opacity: 0;
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(139,0,0,0.6) 100%);
+            transition: opacity 0.5s;
+        }
+
+        .blood-vignette.active {
+            opacity: 1;
+        }
+
+        .blood-text {
+            position: fixed;
+            bottom: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 101;
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #ff0000;
+            text-shadow: 0 0 20px rgba(139,0,0,0.8), 0 2px 4px rgba(0,0,0,0.5);
+            opacity: 0;
+            text-align: center;
+            white-space: nowrap;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            pointer-events: none;
+        }
+
+        .blood-text.active {
+            animation: textReveal 1s 1.5s ease-out forwards;
+        }
+
+        @keyframes textReveal {
+            0% { opacity: 0; transform: translateX(-50%) scale(0.8); }
+            60% { opacity: 1; transform: translateX(-50%) scale(1.05); }
+            100% { opacity: 1; transform: translateX(-50%) scale(1); }
+        }
+
+        .wheel-container.camel-shake {
+            animation: doomShake 0.6s ease-in-out;
+        }
+
+        @keyframes doomShake {
+            0%, 100% { transform: translateX(0); }
+            10% { transform: translateX(-8px) rotate(-2deg); }
+            20% { transform: translateX(8px) rotate(2deg); }
+            30% { transform: translateX(-6px) rotate(-1deg); }
+            40% { transform: translateX(6px) rotate(1deg); }
+            50% { transform: translateX(-4px); }
+            60% { transform: translateX(4px); }
+            70% { transform: translateX(-2px); }
+            80% { transform: translateX(2px); }
+        }
+
         .wheel-spinning .wheel-outer {
             animation: wheelSpin 2s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
@@ -317,6 +410,9 @@
     </div>
 
     <div class="confetti-container" id="confettiContainer"></div>
+    <div class="blood-vignette" id="bloodVignette"></div>
+    <div class="blood-overlay" id="bloodOverlay"></div>
+    <div class="blood-text" id="bloodText">CAMEL MILK</div>
 
     <script>
         const COLORS = [
@@ -381,16 +477,36 @@
                 spinningNumbers.classList.remove('active');
                 wheelContainer.classList.remove('wheel-spinning');
 
-                const finalNumber = getRandomNumber();
-                resultNumber.textContent = finalNumber;
-                resultNumber.style.color = COLORS[Math.floor(Math.random() * COLORS.length)];
-                resultNumber.classList.add('visible', 'pop');
+                const isCamelMilk = Math.random() < 0.025;
 
-                addToHistory(finalNumber);
-                launchConfetti();
+                if (isCamelMilk) {
+                    resultNumber.textContent = 'CAMEL\nMILK';
+                    resultNumber.style.whiteSpace = 'pre';
+                    resultNumber.classList.add('visible', 'pop', 'camel');
+                    wheelContainer.classList.add('camel-shake');
+                    addToHistory('CM');
+                    launchBloodDrip();
 
-                if (navigator.vibrate) {
-                    navigator.vibrate([50, 30, 100]);
+                    if (navigator.vibrate) {
+                        navigator.vibrate([100, 50, 100, 50, 200, 100, 300]);
+                    }
+
+                    setTimeout(() => {
+                        wheelContainer.classList.remove('camel-shake');
+                        resultNumber.classList.remove('camel');
+                        resultNumber.style.whiteSpace = '';
+                    }, 5000);
+                } else {
+                    const finalNumber = getRandomNumber();
+                    resultNumber.textContent = finalNumber;
+                    resultNumber.style.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+                    resultNumber.classList.add('visible', 'pop');
+                    addToHistory(finalNumber);
+                    launchConfetti();
+
+                    if (navigator.vibrate) {
+                        navigator.vibrate([50, 30, 100]);
+                    }
                 }
 
                 btn.disabled = false;
@@ -407,8 +523,10 @@
             history.forEach((num, i) => {
                 const item = document.createElement('div');
                 item.className = 'history-item';
-                item.textContent = num;
-                item.style.background = COLORS[num % COLORS.length];
+                const isCamel = num === 'CM';
+                item.textContent = isCamel ? 'CM' : num;
+                item.style.background = isCamel ? '#8b0000' : COLORS[num % COLORS.length];
+                item.style.fontSize = isCamel ? '0.65rem' : '0.85rem';
                 item.style.animationDelay = (i * 0.05) + 's';
                 if (i > 0) item.style.opacity = 1 - (i * 0.1);
                 container.appendChild(item);
@@ -430,6 +548,35 @@
                 container.appendChild(confetti);
             }
             setTimeout(() => { container.innerHTML = ''; }, 2500);
+        }
+
+        function launchBloodDrip() {
+            const overlay = document.getElementById('bloodOverlay');
+            const vignette = document.getElementById('bloodVignette');
+            const text = document.getElementById('bloodText');
+
+            overlay.innerHTML = '';
+            overlay.classList.add('active');
+            vignette.classList.add('active');
+            text.classList.add('active');
+
+            const dripCount = 15;
+            for (let i = 0; i < dripCount; i++) {
+                const drip = document.createElement('div');
+                drip.className = 'blood-drip';
+                drip.style.left = (Math.random() * 100) + '%';
+                drip.style.width = (Math.random() * 30 + 15) + 'px';
+                drip.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                drip.style.animationDelay = (Math.random() * 1.5) + 's';
+                overlay.appendChild(drip);
+            }
+
+            setTimeout(() => {
+                overlay.classList.remove('active');
+                vignette.classList.remove('active');
+                text.classList.remove('active');
+                overlay.innerHTML = '';
+            }, 5000);
         }
 
         createBubbles();
