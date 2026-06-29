@@ -282,11 +282,26 @@
         }
 
         .result-number.camel {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             color: #ff0000 !important;
             text-shadow: 0 0 30px rgba(255,0,0,0.8), 0 0 60px rgba(139,0,0,0.5);
             line-height: 1.2;
             text-align: center;
+            position: absolute;
+            width: 80%;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) !important;
+        }
+
+        .result-number.camel.visible {
+            transform: translate(-50%, -50%) !important;
+        }
+
+        .spin-btn.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
         }
 
         .blood-overlay {
@@ -484,6 +499,7 @@
                     resultNumber.style.whiteSpace = 'pre';
                     resultNumber.classList.add('visible', 'pop', 'camel');
                     wheelContainer.classList.add('camel-shake');
+                    btn.classList.add('hidden');
                     addToHistory('CM');
                     launchBloodDrip();
 
@@ -495,7 +511,11 @@
                         wheelContainer.classList.remove('camel-shake');
                         resultNumber.classList.remove('camel');
                         resultNumber.style.whiteSpace = '';
+                        btn.classList.remove('hidden');
+                        btn.disabled = false;
+                        isSpinning = false;
                     }, 5000);
+                    return;
                 } else {
                     const finalNumber = getRandomNumber();
                     resultNumber.textContent = finalNumber;
